@@ -8,7 +8,11 @@ using Zenject;
 [CreateAssetMenu(fileName = "GameSettings", menuName = "Installers/GameSettingsInstaller")]
 public class GameSettingsInstaller : ScriptableObjectInstaller<GameSettingsInstaller>
 {
-    public GameSettings GameSettings;
+    /// <summary>
+    /// ScriptableObject с начальными настройками игры
+    /// </summary>
+    [SerializeField]
+    private GameSettings GameSettings;
 
     public override void InstallBindings()
     {

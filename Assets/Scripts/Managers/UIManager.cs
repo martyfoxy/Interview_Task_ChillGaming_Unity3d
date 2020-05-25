@@ -3,6 +3,8 @@ using Assets.Scripts.Interface;
 using Assets.Scripts.Models;
 using Assets.Scripts.Models.Enums;
 using Assets.Scripts.ScriptableObjects;
+using Assets.Scripts.Signals;
+using Assets.Scripts.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +19,7 @@ namespace Assets.Scripts.Managers
     /// <summary>
     /// Менеджер UI
     /// </summary>
-    public class UIManager : MonoBehaviour
+    public class UIManager : MonoBehaviour, IUIManager
     {
         //Ссылки на элементы UI
         [SerializeField]
@@ -27,51 +29,66 @@ namespace Assets.Scripts.Managers
         private Button _startDefaultButton;
 
         [SerializeField]
-        private PlayerPanelHierarchy _PlayerPanel;
+        private PlayerPanelHierarchy _playerPanel;
 
         [SerializeField]
-        private PlayerPanelHierarchy _EnemyPanel;
+        private PlayerPanelHierarchy _enemyPanel;
 
         [SerializeField]
         private GameObject StatPrefab;
 
+        #region DI
         [Inject]
-        public void Construct(IGameManager gameManager, IPlayer player, IEnemy enemy, GameSettings gameSettings)
+        private IGameManager _gameManager;
+        private GameSettings _gameSettings;
+        private IPlayer _player;
+        private IEnemy _enemy;
+        #endregion
+
+        //Словари со ссылками на текст характеристик по ключу - ID характеристики
+        private Dictionary<int, Text> _playerStatsTextRefs = new Dictionary<int, Text>();
+        private Dictionary<int, Text> _enemyStatsTextRefs = new Dictionary<int, Text>();
+
+        //Кэши спрайтов
+        private Dictionary<int, Sprite> _statsSpriteCache = new Dictionary<int, Sprite>();
+        private Dictionary<int, Sprite> _buffsSpriteCache = new Dictionary<int, Sprite>();
+
+        [Inject]
+        public void Construct(IPlayer player, IEnemy enemy, GameSettings gameSettings)
         {
             Debug.Log("UI Manager Construct");
 
-            _gameManager = gameManager;
             _player = player;
             _enemy = enemy;
             _gameSettings = gameSettings;
         }
 
-        //DI
-        private IGameManager _gameManager;
-        private GameSettings _gameSettings;
-        private IPlayer _player;
-        private IEnemy _enemy;
-
         private void Awake()
         {
+            //Сброс
+            _playerStatsTextRefs = new Dictionary<int, Text>();
+            _enemyStatsTextRefs = new Dictionary<int, Text>();
+            _statsSpriteCache = new Dictionary<int, Sprite>();
+            _buffsSpriteCache = new Dictionary<int, Sprite>();
+
             //Подписка кнопок старта
             _startBuffsButton.onClick.AddListener(() =>
             {
-                _gameManager.StartWithBuffs();
+                _gameManager.StartGameWithBuffs();
             });
 
             _startDefaultButton.onClick.AddListener(() =>
             {
-                _gameManager.StartDefault();
+                _gameManager.StartGame();
             });
 
             //Подписка кнопок панелей
-            _PlayerPanel.attackButton.onClick.AddListener(() =>
+            _playerPanel.attackButton.onClick.AddListener(() =>
             {
                 _player.Attack();
             });
 
-            _EnemyPanel.attackButton.onClick.AddListener(() =>
+            _enemyPanel.attackButton.onClick.AddListener(() =>
             {
                 _enemy.Attack();
             });
@@ -80,62 +97,93 @@ namespace Assets.Scripts.Managers
         private void Update()
         {
             //Отключаем кнопки атаки, когда у аниматора состояние атаки или смерти
-            _PlayerPanel.attackButton.interactable = _PlayerPanel.character.GetCurrentAnimatorStateInfo(0).IsName(AnimationNamesConst.IdleAnimationName);
-            _EnemyPanel.attackButton.interactable = _EnemyPanel.character.GetCurrentAnimatorStateInfo(0).IsName(AnimationNamesConst.IdleAnimationName);
+            _playerPanel.attackButton.interactable = _playerPanel.character.GetCurrentAnimatorStateInfo(0).IsName(GameConst.IdleAnimationName);
+            _enemyPanel.attackButton.interactable = _enemyPanel.character.GetCurrentAnimatorStateInfo(0).IsName(GameConst.IdleAnimationName);
         }
 
-        /// <summary>
-        /// Очистить иконки на панелях
-        /// </summary>
+        #region IUIManager implementation
         public void Reset()
         {
-            foreach(Transform child in _PlayerPanel.statsPanel)
+            _playerStatsTextRefs = new Dictionary<int, Text>();
+            _enemyStatsTextRefs = new Dictionary<int, Text>();
+
+            foreach (Transform child in _playerPanel.statsPanel)
                 Destroy(child.gameObject);
-            foreach (Transform child in _EnemyPanel.statsPanel)
+
+            foreach (Transform child in _enemyPanel.statsPanel)
                 Destroy(child.gameObject);
         }
 
-        /// <summary>
-        /// Отобразить иконки статы
-        /// </summary>
         public void ShowStatsIcons()
         {
-            _player.GetStats().ForEach(stat =>
-            {
-                AddStatToPanel(_PlayerPanel.statsPanel, stat);
-            });
+            //Получаем список характеристик, которые есть у каждого игрока
+            List<Stat> stats = _gameSettings.Data.stats.ToList();
 
-            _enemy.GetStats().ForEach(stat =>
+            //Создаем иконки на панелях и запоминаем ссылки на них
+            stats.ForEach(stat =>
             {
-                AddStatToPanel(_EnemyPanel.statsPanel, stat);
+                AddStatToPanel(_playerPanel.statsPanel, stat, true);
+                AddStatToPanel(_enemyPanel.statsPanel, stat, false);
             });
         }
 
-        /// <summary>
-        /// Отобразить иконки баффов
-        /// </summary>
         public void ShowBuffsIcons()
         {
             _player.GetBuffs().ForEach(buff =>
             {
-                AddBuffToPanel(_PlayerPanel.statsPanel, buff);
+                AddBuffToPanel(_playerPanel.statsPanel, buff);
             });
 
             _enemy.GetBuffs().ForEach(buff =>
             {
-                AddBuffToPanel(_EnemyPanel.statsPanel, buff);
+                AddBuffToPanel(_enemyPanel.statsPanel, buff);
             });
+        }
+        #endregion
+
+        /// <summary>
+        /// Обработчик сигнала изменения показаний игроков
+        /// </summary>
+        /// <param name="signal">Сигнал</param>
+        public void UpdateValue(CharacterStatChangedSignal signal)
+        {
+            if (signal.character.GetType() == _player.GetType())
+                _playerStatsTextRefs[signal.StatId].text = signal.Value.ToString();
+            else
+                _enemyStatsTextRefs[signal.StatId].text = signal.Value.ToString(); ;
         }
 
         /// <summary>
-        /// Добавить иконку статы на панель
+        /// Добавить иконку характеристики на панель
         /// </summary>
         /// <param name="panel">Панель</param>
         /// <param name="stat">Стата</param>
-        private void AddStatToPanel(Transform panel, Stat stat)
+        /// <param name="isPlayer">Флаг, являются ли игроком или противником</param>
+        private void AddStatToPanel(Transform panel, Stat stat, bool isPlayer)
         {
-            var icon = Resources.Load<Sprite>("Icons/" + stat.icon);
-            AddIconToPanel(panel, icon, stat.value.ToString());
+            Sprite sprite;
+            if(!_statsSpriteCache.TryGetValue(stat.id, out sprite))
+            {
+                //Грузим спрайт и сохраняем в кэш
+                sprite = Resources.Load<Sprite>("Icons/" + stat.icon);
+                _statsSpriteCache.Add(stat.id, sprite);
+            }
+
+            //Создаем иконки
+            var go = InstantiateIconOnPanel(panel, sprite);
+
+            //Кэшируем ссылки на текст
+            var textComp = go.GetComponentInChildren<Text>();
+            if (isPlayer)
+            {
+                if (!_playerStatsTextRefs.ContainsKey(stat.id))
+                    _playerStatsTextRefs.Add(stat.id, textComp);
+            }
+            else
+            {
+                if (!_enemyStatsTextRefs.ContainsKey(stat.id))
+                    _enemyStatsTextRefs.Add(stat.id, textComp);
+            }
         }
 
         /// <summary>
@@ -145,22 +193,32 @@ namespace Assets.Scripts.Managers
         /// <param name="buff">Бафф</param>
         private void AddBuffToPanel(Transform panel, Buff buff)
         {
-            var icon = Resources.Load<Sprite>("Icons/" + buff.icon);
-            AddIconToPanel(panel, icon, buff.title);
+            Sprite sprite;
+            if(!_buffsSpriteCache.TryGetValue(buff.id, out sprite))
+            {
+                //Грузим спрайт и сохраняем в кэш
+                sprite = Resources.Load<Sprite>("Icons/" + buff.icon);
+                _buffsSpriteCache.Add(buff.id, sprite);
+            }
+            
+            //Создаем иконки и отображаем имя баффа
+            var go = InstantiateIconOnPanel(panel, sprite);
+            go.GetComponentInChildren<Text>().text = buff.title;
         }
 
         /// <summary>
-        /// Добавить иконку на панель
+        /// Создать префаб с иконкой на панели
         /// </summary>
-        /// <param name="panel">Панель</param>
-        /// <param name="icon">Иконка</param>
-        private void AddIconToPanel(Transform panel, Sprite icon, string title)
+        /// <param name="panel">Трансформ панели</param>
+        /// <param name="icon">Спрайт с иконкой</param>
+        private GameObject InstantiateIconOnPanel(Transform panel, Sprite icon)
         {
             var go = Instantiate(StatPrefab, panel);
-            var iconComp = go.GetComponentsInChildren<Image>().First(x => x.name == HierarchyNamesConst.IconName);
-            var textComp = go.GetComponentInChildren<Text>();
+
+            var iconComp = go.GetComponentsInChildren<Image>().First(x => x.name == GameConst.IconName);
             iconComp.sprite = icon;
-            textComp.text = title;
+
+            return go;
         }
     }
 }

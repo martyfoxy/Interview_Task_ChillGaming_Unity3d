@@ -10,30 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f5c82f93a732536448922bad7a778b3e, type: 3}
-  m_Name: CurrentSettings
+  m_Name: StartUpGameSettings
   m_EditorClassIdentifier: 
-  data:
+  _data:
     settings:
       buffCountMin: 0
       buffCountMax: 5
       allowDuplicateBuffs: 0
-    stats:
-    - id: 0
-      title: "\u0436\u0438\u0437\u043D\u044C"
-      icon: hp
-      value: 100
-    - id: 1
-      title: "\u0431\u0440\u043E\u043D\u044F"
-      icon: armor
-      value: 25
-    - id: 2
-      title: "\u0443\u0440\u043E\u043D"
-      icon: axe
-      value: 25
-    - id: 3
-      title: "\u0432\u0430\u043C\u043F\u0438\u0440\u0438\u0437\u043C"
-      icon: Meat
-      value: 0
+    stats: []
     buffs:
     - icon: book
       id: 0

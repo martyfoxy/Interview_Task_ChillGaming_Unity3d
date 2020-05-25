@@ -16,14 +16,28 @@ namespace Assets.Scripts.Interface
         /// <returns>Текущее HP</returns>
         float GetHP();
 
+        /// <summary>
+        /// Получить текущий урона
+        /// </summary>
+        /// <returns>Текущий урон</returns>
         float GetDamage();
 
+        /// <summary>
+        /// Получить текущую броню
+        /// </summary>
+        /// <returns>Текущая броня</returns>
         float GetArmor();
 
+        /// <summary>
+        /// Получить текущий вампиризм
+        /// </summary>
+        /// <returns>Текущий вампиризм</returns>
         float GetVampirism();
 
-        List<Stat> GetStats();
-
+        /// <summary>
+        /// Получить список баффов персонажа
+        /// </summary>
+        /// <returns>Список баффов</returns>
         List<Buff> GetBuffs();
 
 
@@ -36,7 +50,7 @@ namespace Assets.Scripts.Interface
         /// Получить урон
         /// </summary>
         /// <param name="damage">Количество урона</param>
-        /// <returns>Результирующий урон</returns>
+        /// <returns>Результирующий полученный урон</returns>
         float TakeDamage(float damage);
 
         /// <summary>
@@ -58,10 +72,10 @@ namespace Assets.Scripts.Interface
         void ChangeState(StatesEnum state);
 
         /// <summary>
-        /// Задать начальные характеристики
+        /// Задать начальные характеристики и добавить в игру
         /// </summary>
         /// <param name="startStats">Начальная стата</param>
         /// <param name="startBuffs">Начальные баффы</param>
-        void SetDefault(List<Stat> startStats, List<Buff> startBuffs);
+        void BeginPlay(List<Stat> startStats, List<Buff> startBuffs);
     }
 }

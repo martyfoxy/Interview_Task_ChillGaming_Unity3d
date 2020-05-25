@@ -11,6 +11,14 @@ namespace Assets.Scripts.ScriptableObjects
     [CreateAssetMenu(fileName = "Game Settings Scriptable Object", menuName = "Game Settings", order = 1)]
     public class GameSettings : ScriptableObject
     {
-        public Data data;
+        [SerializeField]
+        private Data _data;
+
+        public Data Data => _data;
+
+        public void SetData(Data data)
+        {
+            _data = data;
+        }
     }
 }

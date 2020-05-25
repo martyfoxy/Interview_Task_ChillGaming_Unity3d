@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Characters;
 using Assets.Scripts.Interface;
 using Assets.Scripts.Models;
+using Assets.Scripts.Models.Enums;
 using Assets.Scripts.ScriptableObjects;
 using System;
 using System.Collections.Generic;
@@ -16,16 +17,18 @@ namespace Assets.Scripts.Managers
     /// </summary>
     public class GameManager : IInitializable, IGameManager
     {
-        //DI
+        #region DI
+        [Inject]
+        private IUIManager _uiManager;
         private IPlayer _player;
         private IEnemy _enemy;
         private GameSettings _gameSettings;
-
-        [Inject]
-        private UIManager _uiManager;
+        #endregion
 
         public GameManager(IPlayer player, IEnemy enemy, GameSettings gameSettings)
         {
+            Debug.Log("GameManager Constructor");
+
             _player = player;
             _enemy = enemy;
             _gameSettings = gameSettings;
@@ -33,42 +36,53 @@ namespace Assets.Scripts.Managers
 
         public void Initialize()
         {
-            Debug.Log("GameManager init");
+            Debug.Log("GameManager Init");
 
-            //Десериализуем json с данными игры и засовываем в скриптовый объект
-            TextAsset dataFile = Resources.Load("data") as TextAsset;
-            _gameSettings.data = JsonUtility.FromJson<Data>(dataFile.text);
+            //Грузим настройки из текстового файла в скриетовый объект
+            LoadStartUpSettingsFile(GameConst.StartUpSettingsFile);
 
             //По-умолчанию начинаем игру без бафов
-            StartDefault();
+            StartGame();
         }
 
         #region IGameManager implementation
-        public void StartDefault()
+        public void StartGame()
         {
             Debug.Log("Начать игру без бафов");
 
             _uiManager.Reset();
-            
-            var startStats = _gameSettings.data.stats.ToList();
-            _player.SetDefault(startStats, new List<Buff>());
-            _enemy.SetDefault(startStats, new List<Buff>());
-
             _uiManager.ShowStatsIcons();
+
+            var startStats = _gameSettings.Data.stats.ToList();
+            _player.BeginPlay(startStats, new List<Buff>());
+            _enemy.BeginPlay(startStats, new List<Buff>());
         }
 
-        public void StartWithBuffs()
+        public void StartGameWithBuffs()
         {
             Debug.Log("Начать игру с бафами");
 
             _uiManager.Reset();
-
-            var startStats = _gameSettings.data.stats.ToList();
-            _player.SetDefault(startStats, GetRandomBuffs());
-            _enemy.SetDefault(startStats, GetRandomBuffs());
-
             _uiManager.ShowStatsIcons();
+
+            var startStats = _gameSettings.Data.stats.ToList();
+            _player.BeginPlay(startStats, GetRandomBuffs());
+            _enemy.BeginPlay(startStats, GetRandomBuffs());
+            
             _uiManager.ShowBuffsIcons();
+        }
+
+        public void LoadStartUpSettingsFile(string fileName)
+        {
+            //Сброс
+            _gameSettings.SetData(new Data());
+
+            TextAsset asset = Resources.Load(fileName) as TextAsset;
+
+            if (asset == null)
+                throw new Exception("Не удалось загрузить ассет с настройками");
+
+            _gameSettings.SetData(JsonUtility.FromJson<Data>(asset.text));
         }
         #endregion
 
@@ -81,14 +95,14 @@ namespace Assets.Scripts.Managers
             List<Buff> buffList = new List<Buff>();
 
             //Случайное количество бафов
-            var buffCount = Random.Range(_gameSettings.data.settings.buffCountMin, _gameSettings.data.settings.buffCountMax);
+            var buffCount = Random.Range(_gameSettings.Data.settings.buffCountMin, _gameSettings.Data.settings.buffCountMax);
 
             for (int i = 0; i < buffCount; i++)
             {
-                var randomIndex = Random.Range(0, _gameSettings.data.buffs.Length - 1);
-                var newBuff = _gameSettings.data.buffs[randomIndex];
+                var randomIndex = Random.Range(0, _gameSettings.Data.buffs.Length - 1);
+                var newBuff = _gameSettings.Data.buffs[randomIndex];
 
-                if (_gameSettings.data.settings.allowDuplicateBuffs || !buffList.Contains(newBuff))
+                if (_gameSettings.Data.settings.allowDuplicateBuffs || !buffList.Contains(newBuff))
                     buffList.Add(newBuff);
             }
 

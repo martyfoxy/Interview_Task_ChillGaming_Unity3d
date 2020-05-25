@@ -18,12 +18,17 @@ namespace Assets.Scripts.Mocks
             
         }
 
-        public void StartDefault()
+        public void LoadStartUpSettingsFile(string fileName)
+        {
+            
+        }
+
+        public void StartGame()
         {
             Debug.Log("Начать игру без бафов");
         }
 
-        public void StartWithBuffs()
+        public void StartGameWithBuffs()
         {
             Debug.Log("Начать игру с бафами");
         }

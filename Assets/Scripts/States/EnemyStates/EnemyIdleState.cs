@@ -1,12 +1,5 @@
-﻿using Assets.Scripts.Characters;
-using Assets.Scripts.Interface;
+﻿using Assets.Scripts.Interface;
 using Assets.Scripts.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using Zenject;
 
 namespace Assets.Scripts.States.EnemyStates
@@ -25,18 +18,6 @@ namespace Assets.Scripts.States.EnemyStates
 
         public void OnStart()
         {
-        }
-
-        public void OnUpdate()
-        {
-            //Переход с состояние смерти
-            if (_enemy.GetHP() < 1)
-                _enemy.ChangeState(StatesEnum.Dead);
-        }
-
-        public void OnDispose()
-        {
-
         }
 
         public void Attack()

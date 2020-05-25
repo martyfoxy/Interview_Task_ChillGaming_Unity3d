@@ -1,12 +1,5 @@
-﻿using Assets.Scripts.Characters;
-using Assets.Scripts.Interface;
+﻿using Assets.Scripts.Interface;
 using Assets.Scripts.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using Zenject;
 
 namespace Assets.Scripts.States.PlayerStates
@@ -25,17 +18,8 @@ namespace Assets.Scripts.States.PlayerStates
 
         public void OnStart()
         {
-            _player.GetAnimator().SetInteger(AnimationParametersConst.HealthParameter, 0);
-        }
-
-        public void OnUpdate()
-        {
-
-        }
-
-        public void OnDispose()
-        {
-
+            //Анимация смерти
+            _player.GetAnimator().SetInteger(GameConst.HealthParameter, 0);
         }
 
         public void Attack()

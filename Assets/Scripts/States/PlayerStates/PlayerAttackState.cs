@@ -1,8 +1,5 @@
-﻿using Assets.Scripts.Characters;
-using Assets.Scripts.Interface;
+﻿using Assets.Scripts.Interface;
 using Assets.Scripts.Models.Enums;
-using Assets.Scripts.States.StateFactories;
-using UnityEngine;
 using Zenject;
 
 namespace Assets.Scripts.States.PlayerStates
@@ -24,30 +21,18 @@ namespace Assets.Scripts.States.PlayerStates
         public void OnStart()
         {
             //Анимация удара
-            _player.GetAnimator().SetBool(AnimationParametersConst.AttackParameter, true);
+            _player.GetAnimator().SetBool(GameConst.AttackParameter, true);
 
             Attack();
-        }
-
-        public void OnUpdate()
-        {
-            //Переход в состояние смерти
-            if (_player.GetHP() < 1)
-                _player.ChangeState(StatesEnum.Dead);
-        }
-
-        public void OnDispose()
-        {
-
         }
 
         public void Attack()
         {
             //Нанесение урона
-            var damage = _enemy.TakeDamage(_player.GetDamage());
+            var resDamage = _enemy.TakeDamage(_player.GetDamage());
 
             //Вампиризм
-            _player.VampirismRestore(damage);
+            _player.VampirismRestore(resDamage);
 
             //Переход в покой
             _player.ChangeState(StatesEnum.Idle);

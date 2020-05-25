@@ -1,12 +1,5 @@
-﻿using Assets.Scripts.Characters;
-using Assets.Scripts.Interface;
+﻿using Assets.Scripts.Interface;
 using Assets.Scripts.Models.Enums;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using Zenject;
 
 namespace Assets.Scripts.States.EnemyStates
@@ -17,37 +10,29 @@ namespace Assets.Scripts.States.EnemyStates
     public class EnemyAttackState : IState
     {
         private IEnemy _enemy;
+        private IPlayer _player;
 
-        public EnemyAttackState(IEnemy enemy)
+        public EnemyAttackState(IEnemy enemy, IPlayer player)
         {
             _enemy = enemy;
+            _player = player;
         }
 
         public void OnStart()
         {
             //Анимация удара
-            _enemy.GetAnimator().SetBool(AnimationParametersConst.AttackParameter, true);
+            _enemy.GetAnimator().SetBool(GameConst.AttackParameter, true);
 
             Attack();
-        }
-
-        public void OnUpdate()
-        {
-            //Переход в состояние смерти
-            if (_enemy.GetHP() < 1)
-                _enemy.ChangeState(StatesEnum.Dead);
-        }
-
-        public void OnDispose()
-        {
-
         }
 
         public void Attack()
         {
             //Нанесение урона
-            //...
-            Debug.Log("ATTACK");
+            var resDamage = _player.TakeDamage(_enemy.GetDamage());
+
+            //Вампиризм
+            _enemy.VampirismRestore(resDamage);
 
             //Переход в покой
             _enemy.ChangeState(StatesEnum.Idle);

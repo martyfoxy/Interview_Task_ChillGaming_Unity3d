@@ -2,6 +2,7 @@
 using Assets.Scripts.Interface;
 using Assets.Scripts.Managers;
 using Assets.Scripts.ScriptableObjects;
+using Assets.Scripts.Signals;
 using Assets.Scripts.States;
 using Assets.Scripts.States.EnemyStates;
 using Assets.Scripts.States.PlayerStates;
@@ -33,6 +34,11 @@ namespace Assets.Scripts.Installers
         /// </summary>
         private void InstallCore()
         {
+            SignalBusInstaller.Install(Container);
+
+            Container.DeclareSignal<CharacterStatChangedSignal>();
+            Container.BindSignal<CharacterStatChangedSignal>().ToMethod<UIManager>(x => x.UpdateValue).FromResolve();
+
             Container.BindInterfacesAndSelfTo<GameManager>().AsSingle();
         }
 
@@ -48,8 +54,6 @@ namespace Assets.Scripts.Installers
             Container.BindFactory<PlayerIdleState, PlayerIdleState.Factory>().WhenInjectedInto<PlayerStateFactory>();
             Container.BindFactory<PlayerAttackState, PlayerAttackState.Factory>().WhenInjectedInto<PlayerStateFactory>();
             Container.BindFactory<PlayerDeadState, PlayerDeadState.Factory>().WhenInjectedInto<PlayerStateFactory>();
-
-            Container.Bind<IPlayer>().To<Player>().FromResolve();
         }
 
         /// <summary>
@@ -64,8 +68,6 @@ namespace Assets.Scripts.Installers
             Container.BindFactory<EnemyIdleState, EnemyIdleState.Factory>().WhenInjectedInto<EnemyStateFactory>();
             Container.BindFactory<EnemyAttackState, EnemyAttackState.Factory>().WhenInjectedInto<EnemyStateFactory>();
             Container.BindFactory<EnemyDeadState, EnemyDeadState.Factory>().WhenInjectedInto<EnemyStateFactory>();
-
-            Container.Bind<IEnemy>().To<Enemy>().FromResolve();
         }
     }
 }

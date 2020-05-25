@@ -1,6 +1,7 @@
 ﻿using Assets.Scripts.Interface;
 using Assets.Scripts.Models;
 using Assets.Scripts.Models.Enums;
+using Assets.Scripts.Signals;
 using Assets.Scripts.States.StateFactories;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,43 +18,95 @@ namespace Assets.Scripts.Characters
         /// <summary>
         /// Текущее здоровье
         /// </summary>
-        public float HP;// { get; private set; }
+        public float HP
+        {
+            get
+            {
+                return _currentStats[0];
+            }
+            private set
+            {
+                _currentStats[0] = value;
+                if (value < 1)
+                {
+                    _currentStats[0] = 0;
+                    ChangeState(StatesEnum.Dead);
+                }
+
+                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = 0, Value = _currentStats[0], character = this });
+            }
+        }
 
         /// <summary>
         /// Текущая броня
         /// </summary>
-        public float Armor;// { get; private set; }
+        public float Armor
+        {
+            get
+            {
+                return _currentStats[1];
+            }
+            private set
+            {
+                _currentStats[1] = value;
+                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = 1, Value = _currentStats[1], character = this });
+            }
+        }
 
         /// <summary>
         /// Текущий уроне
         /// </summary>
-        public float Damage;// { get; private set; }
+        public float Damage
+        {
+            get
+            {
+                return _currentStats[2];
+            }
+            private set
+            {
+                _currentStats[2] = value;
+                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = 2, Value = _currentStats[2], character = this });
+            }
+        }
 
         /// <summary>
         /// Текущий вампиризм
         /// </summary>
-        public float Vampirism;// { get; private set; }
+        public float Vampirism
+        {
+            get
+            {
+                return _currentStats[3];
+            }
+            private set
+            {
+                _currentStats[3] = value;
+                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = 3, Value = _currentStats[3], character = this });
+            }
+        }
         #endregion
 
+        //Словарь текущих характеристик в формате [id - значение]
+        private Dictionary<int, float> _currentStats = new Dictionary<int, float>();
 
-        public List<Stat> DefaultStats;
-        public List<Buff> EnemyBuffs;
 
         //Приватные поля
+        private List<Buff> _buffs;
         private Animator _animator;
         private IState _currentState;
 
-        //DI
+        #region DI
         private EnemyStateFactory _stateFactory;
-        private IPlayer _player;
+        private SignalBus _signalBus;
+        #endregion
 
         [Inject]
-        public void Construct(EnemyStateFactory stateFactory, IPlayer player)
+        public void Construct(EnemyStateFactory stateFactory, SignalBus signalBus)
         {
-            _stateFactory = stateFactory;
-            _player = player;
-
             Debug.Log("Enemy Construct");
+
+            _stateFactory = stateFactory;
+            _signalBus = signalBus;
         }
 
         private void Awake()
@@ -61,21 +114,31 @@ namespace Assets.Scripts.Characters
             _animator = GetComponent<Animator>();
         }
 
-        private void Start()
+        /// <summary>
+        /// Добавить начальную характеристику
+        /// </summary>
+        /// <param name="stat"></param>
+        private void SetCurrentStat(Stat stat)
         {
-            //ChangeState(StatesEnum.Idle);
-        }
-
-        private void Update()
-        {
-            _currentState.OnUpdate();
+            if (!_currentStats.ContainsKey(stat.id))
+            {
+                _currentStats.Add(stat.id, stat.value);
+                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = stat.id, Value = stat.value, character = this });
+            }
         }
 
         #region ICharacter implementation
-        public void SetDefault(List<Stat> startStats, List<Buff> startBuffs)
+        public void BeginPlay(List<Stat> startStats, List<Buff> startBuffs)
         {
-            DefaultStats = new List<Stat>(startStats);
-            EnemyBuffs = new List<Buff>(startBuffs);
+            //Сброс
+            _currentStats = new Dictionary<int, float>();
+            _buffs = new List<Buff>(startBuffs);
+            _animator.SetBool(GameConst.AttackParameter, false);
+
+            //Заполняем словарь начальными значениями
+            startStats.ForEach(x => SetCurrentStat(x));
+
+            _animator.SetInteger(GameConst.HealthParameter, (int)HP);
 
             //Вычисляем влияние баффов
             for (int i = 0; i < startBuffs.Count; i++)
@@ -86,22 +149,17 @@ namespace Assets.Scripts.Characters
                 {
                     BuffStat buffStat = buff.stats[j];
 
-                    //Находим параметр по id и складываем значения
-                    Stat stat = DefaultStats.Find(x => x.id == buffStat.statId);
-                    if (stat != null)
-                        stat.value += buffStat.value;
+                    //Находим стату по id и складываем
+                    float oldValue;
+                    if (_currentStats.TryGetValue(buffStat.statId, out oldValue))
+                    {
+                        _currentStats[buffStat.statId] = oldValue + buffStat.value;
+                        _signalBus.Fire(new CharacterStatChangedSignal() { StatId = buffStat.statId, Value = _currentStats[buffStat.statId], character = this });
+                    }
                 }
             }
 
-            //Применяем параметры
-            HP = DefaultStats[0].value;
-            Armor = DefaultStats[1].value;
-            Damage = DefaultStats[2].value;
-            Vampirism = DefaultStats[3].value;
-
-            //Сброс
-            _animator.SetInteger(AnimationParametersConst.HealthParameter, (int)HP);
-            _animator.SetBool(AnimationParametersConst.AttackParameter, false);
+            //Переход в состояние покоя
             ChangeState(StatesEnum.Idle);
         }
 
@@ -124,7 +182,7 @@ namespace Assets.Scripts.Characters
         public void VampirismRestore(float resDamage)
         {
             //В зависимости от нанесенного урона, вычисляем восстановленное hp, зависящее от вампиризма
-            var restoredHp = (100 - Vampirism) / 100 * resDamage;
+            var restoredHp = Vampirism / 100 * resDamage;
 
             HP += restoredHp;
         }
@@ -152,10 +210,7 @@ namespace Assets.Scripts.Characters
         public void ChangeState(StatesEnum state)
         {
             if (_currentState != null)
-            {
-                _currentState.OnDispose();
                 _currentState = null;
-            }
 
             Debug.Log($"{name} новое состояние: {state}");
 
@@ -168,14 +223,9 @@ namespace Assets.Scripts.Characters
             return _animator;
         }
 
-        public List<Stat> GetStats()
-        {
-            return DefaultStats;
-        }
-
         public List<Buff> GetBuffs()
         {
-            return EnemyBuffs;
+            return _buffs;
         }
         #endregion
     }

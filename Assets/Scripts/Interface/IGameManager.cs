@@ -11,11 +11,16 @@ namespace Assets.Scripts.Interface
         /// <summary>
         /// Начать игру без бафов
         /// </summary>
-        void StartDefault();
+        void StartGame();
 
         /// <summary>
         /// Начать игру с бафами
         /// </summary>
-        void StartWithBuffs();
+        void StartGameWithBuffs();
+
+        /// <summary>
+        /// Загрузить файл с настройками для начала игры
+        /// </summary>
+        void LoadStartUpSettingsFile(string fileName);
     }
 }

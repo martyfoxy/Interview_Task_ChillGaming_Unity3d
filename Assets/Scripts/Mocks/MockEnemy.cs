@@ -12,13 +12,40 @@ namespace Assets.Scripts.Mocks
 {
     public class MockEnemy : IEnemy
     {
+        public float HP = 100f;
+        public float Armor = 0f;
+        public float Damage = 0f;
+        public float Vampirism = 0f;
+
+        public List<Stat> DefaultStats;
+        public List<Buff> EnemyBuffs;
+
         public void Attack()
         {
+
         }
 
         public void ChangeState(StatesEnum state)
         {
-            
+
+        }
+
+        public void BeginPlay(List<Stat> startStats, List<Buff> startBuffs)
+        {
+            DefaultStats = new List<Stat>(startStats);
+            EnemyBuffs = new List<Buff>(startBuffs);
+        }
+
+        public void VampirismRestore(float damage)
+        {
+
+        }
+
+        public float TakeDamage(float damage)
+        {
+            //Урон, гасящийся броней
+            var resDamage = (100 - Armor) / 100 * damage;
+            return resDamage;
         }
 
         public Animator GetAnimator()
@@ -26,53 +53,29 @@ namespace Assets.Scripts.Mocks
             return new Animator();
         }
 
-        public float GetArmor()
+        public float GetHP()
         {
-            throw new NotImplementedException();
-        }
-
-        public List<Buff> GetBuffs()
-        {
-            throw new NotImplementedException();
+            return HP;
         }
 
         public float GetDamage()
         {
-            throw new NotImplementedException();
+            return Damage;
         }
 
-        public float GetHP()
+        public float GetArmor()
         {
-            return 100f;
-        }
-
-        public List<Stat> GetStats()
-        {
-            throw new NotImplementedException();
+            return Armor;
         }
 
         public float GetVampirism()
         {
-            throw new NotImplementedException();
+            return Vampirism;
         }
 
-        public void SetDefault(List<Stat> startStats, List<Buff> startBuffs)
+        public List<Buff> GetBuffs()
         {
-            
-        }
-
-        public void TakeDamage(float damage)
-        {
-        }
-
-        public void VampirismRestore(float damage)
-        {
-            throw new NotImplementedException();
-        }
-
-        float ICharacter.TakeDamage(float damage)
-        {
-            throw new NotImplementedException();
+            return EnemyBuffs;
         }
     }
 }
