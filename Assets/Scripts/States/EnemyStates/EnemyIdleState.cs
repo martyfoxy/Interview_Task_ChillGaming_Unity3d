@@ -16,28 +16,33 @@ namespace Assets.Scripts.States.EnemyStates
     /// </summary>
     public class EnemyIdleState : IState
     {
-        private Enemy _enemy;
+        private IEnemy _enemy;
 
-        public EnemyIdleState(Enemy enemy)
+        public EnemyIdleState(IEnemy enemy)
         {
             _enemy = enemy;
         }
 
         public void OnStart()
         {
-            _enemy.EnemyAnimator.SetBool("Attack", false);
         }
 
         public void OnUpdate()
         {
             //Переход с состояние смерти
-            if (_enemy.HP < 1)
+            if (_enemy.GetHP() < 1)
                 _enemy.ChangeState(StatesEnum.Dead);
         }
 
         public void OnDispose()
         {
 
+        }
+
+        public void Attack()
+        {
+            //Переход в состояние атаки
+            _enemy.ChangeState(StatesEnum.Attack);
         }
 
         /// <summary>

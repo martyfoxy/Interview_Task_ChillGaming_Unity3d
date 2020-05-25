@@ -16,9 +16,9 @@ namespace Assets.Scripts.States.EnemyStates
     /// </summary>
     public class EnemyAttackState : IState
     {
-        private Enemy _enemy;
+        private IEnemy _enemy;
 
-        public EnemyAttackState(Enemy enemy)
+        public EnemyAttackState(IEnemy enemy)
         {
             _enemy = enemy;
         }
@@ -26,23 +26,31 @@ namespace Assets.Scripts.States.EnemyStates
         public void OnStart()
         {
             //Анимация удара
-            _enemy.EnemyAnimator.SetBool("Attack", true);
+            _enemy.GetAnimator().SetBool(AnimationParametersConst.AttackParameter, true);
 
-            //Нанесение урона
-            //...
-
-            //Переход в состояние покоя
-            _enemy.ChangeState(StatesEnum.Idle);
+            Attack();
         }
 
         public void OnUpdate()
         {
-
+            //Переход в состояние смерти
+            if (_enemy.GetHP() < 1)
+                _enemy.ChangeState(StatesEnum.Dead);
         }
 
         public void OnDispose()
         {
 
+        }
+
+        public void Attack()
+        {
+            //Нанесение урона
+            //...
+            Debug.Log("ATTACK");
+
+            //Переход в покой
+            _enemy.ChangeState(StatesEnum.Idle);
         }
 
         /// <summary>

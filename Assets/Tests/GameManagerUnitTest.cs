@@ -12,8 +12,15 @@ public class GameManagerTest : ZenjectUnitTestFixture
     [SetUp]
     public void BindInterfaces()
     {
+        GameSettingsInstaller.InstallFromResource("ScriptableObjects/Installers/GameSettingsInstaller", Container);
+
         //Запускаем тестовый установщик
         TestInstaller.Install(Container);
+
+        Container.Bind<IPlayer>().To<MockPlayer>().AsSingle();
+        Container.Bind<IEnemy>().To<MockEnemy>().AsSingle();
+
+        Container.BindInterfacesAndSelfTo<GameManager>().AsSingle();
     }
 
     [Test]
@@ -25,9 +32,9 @@ public class GameManagerTest : ZenjectUnitTestFixture
     }
 
     [Test]
-    public void IGameManagerResolvesAsMockGameManager()
+    public void IGameManagerResolvesAsGameManager()
     {
-        MockGameManager manager = Container.Resolve<IGameManager>() as MockGameManager;
+        GameManager manager = Container.Resolve<IGameManager>() as GameManager;
 
         Assert.NotNull(manager);
     }

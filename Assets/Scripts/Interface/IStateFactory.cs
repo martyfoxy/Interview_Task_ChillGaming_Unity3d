@@ -4,7 +4,7 @@ using Assets.Scripts.States;
 namespace Assets.Scripts.Interface
 {
     /// <summary>
-    /// Интерфейс фабрик состояний
+    /// Интерфейс фабрик состояний персонажей
     /// </summary>
     public interface IStateFactory
     {

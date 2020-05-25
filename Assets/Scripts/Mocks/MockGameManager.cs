@@ -12,11 +12,10 @@ namespace Assets.Scripts.Mocks
 {
     public class MockGameManager : IGameManager
     {
-        private Player _player;
 
         public MockGameManager()
         {
-            _player = new Player();
+            
         }
 
         public void StartDefault()

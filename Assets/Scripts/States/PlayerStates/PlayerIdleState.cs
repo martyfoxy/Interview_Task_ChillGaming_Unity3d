@@ -16,28 +16,33 @@ namespace Assets.Scripts.States.PlayerStates
     /// </summary>
     public class PlayerIdleState : IState
     {
-        private Player _player;
+        private IPlayer _player;
 
-        public PlayerIdleState(Player player)
+        public PlayerIdleState(IPlayer player)
         {
             _player = player;
         }
 
         public void OnStart()
         {
-            _player.PlayerAnimator.SetBool("Attack", false);
         }
 
         public void OnUpdate()
         {
             //Переход в состояние смерти
-            if (_player.HP < 1)
+            if (_player.GetHP() < 1)
                 _player.ChangeState(StatesEnum.Dead);
         }
 
         public void OnDispose()
         {
 
+        }
+
+        public void Attack()
+        {
+            //Переход в состояние атаки
+            _player.ChangeState(StatesEnum.Attack);
         }
 
         /// <summary>

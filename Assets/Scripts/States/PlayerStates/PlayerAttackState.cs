@@ -12,36 +12,45 @@ namespace Assets.Scripts.States.PlayerStates
     /// </summary>
     public class PlayerAttackState : IState
     {
-        private Player _player;
+        private IPlayer _player;
+        private IEnemy _enemy;
 
-        public PlayerAttackState(Player player)
+        public PlayerAttackState(IPlayer player, IEnemy enemy)
         {
             _player = player;
+            _enemy = enemy;
         }
 
         public void OnStart()
         {
             //Анимация удара
-            _player.PlayerAnimator.SetBool("Attack", true);
+            _player.GetAnimator().SetBool(AnimationParametersConst.AttackParameter, true);
 
-            //Нанесение урона
-            //...
+            Attack();
         }
 
         public void OnUpdate()
         {
             //Переход в состояние смерти
-            if (_player.HP < 1)
+            if (_player.GetHP() < 1)
                 _player.ChangeState(StatesEnum.Dead);
-
-            //Когда анимация перешла из атаки в покой, переходим в состояние покоя
-            if (_player.PlayerAnimator.GetCurrentAnimatorStateInfo(0).IsName("basePlayer_idle"))
-                _player.ChangeState(StatesEnum.Idle);
         }
 
         public void OnDispose()
         {
 
+        }
+
+        public void Attack()
+        {
+            //Нанесение урона
+            var damage = _enemy.TakeDamage(_player.GetDamage());
+
+            //Вампиризм
+            _player.VampirismRestore(damage);
+
+            //Переход в покой
+            _player.ChangeState(StatesEnum.Idle);
         }
 
         /// <summary>

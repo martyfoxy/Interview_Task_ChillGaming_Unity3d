@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Characters;
 using Assets.Scripts.Interface;
+using Assets.Scripts.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,16 +16,17 @@ namespace Assets.Scripts.States.EnemyStates
     /// </summary>
     public class EnemyDeadState : IState
     {
-        private Enemy _enemy;
+        private IEnemy _enemy;
 
-        public EnemyDeadState(Enemy enemy)
+        public EnemyDeadState(IEnemy enemy)
         {
             _enemy = enemy;
         }
 
         public void OnStart()
         {
-            _enemy.EnemyAnimator.SetFloat("Health", _enemy.HP);
+            var animator = _enemy.GetAnimator();
+            animator.SetInteger(AnimationParametersConst.HealthParameter, 0);
         }
 
         public void OnUpdate()
@@ -35,6 +37,11 @@ namespace Assets.Scripts.States.EnemyStates
         public void OnDispose()
         {
 
+        }
+
+        public void Attack()
+        {
+            //Ничего не делаем
         }
 
         /// <summary>

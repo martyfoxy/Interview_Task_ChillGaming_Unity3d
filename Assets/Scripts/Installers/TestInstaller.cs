@@ -1,9 +1,11 @@
-﻿using Assets.Scripts.Interface;
+﻿using Assets.Scripts.Characters;
+using Assets.Scripts.Interface;
 using Assets.Scripts.Managers;
 using Assets.Scripts.Mocks;
 using Assets.Scripts.States.EnemyStates;
 using Assets.Scripts.States.PlayerStates;
 using Assets.Scripts.States.StateFactories;
+using UnityEngine;
 using Zenject;
 
 namespace Assets.Scripts.Installers
@@ -15,11 +17,8 @@ namespace Assets.Scripts.Installers
     {
         public override void InstallBindings()
         {
-            //Биндим mock игрового менеджера
-            Container.Bind<IGameManager>().To<MockGameManager>().AsSingle();
-
             //Биндим фабрику состояний игрока
-            Container.BindInterfacesAndSelfTo<PlayerStateFactory>().AsSingle();
+            Container.Bind<PlayerStateFactory>().AsSingle();
 
             //Биндим конкретные фабрики каждого состояния
             Container.BindFactory<PlayerIdleState, PlayerIdleState.Factory>().WhenInjectedInto<PlayerStateFactory>();
@@ -27,7 +26,7 @@ namespace Assets.Scripts.Installers
             Container.BindFactory<PlayerDeadState, PlayerDeadState.Factory>().WhenInjectedInto<PlayerStateFactory>();
 
             //Бндним фабрику состояний противника
-            Container.BindInterfacesAndSelfTo<EnemyStateFactory>().AsSingle();
+            Container.Bind<EnemyStateFactory>().AsSingle();
 
             //Биндим конкретные фабрики каждого состояния
             Container.BindFactory<EnemyIdleState, EnemyIdleState.Factory>().WhenInjectedInto<EnemyStateFactory>();

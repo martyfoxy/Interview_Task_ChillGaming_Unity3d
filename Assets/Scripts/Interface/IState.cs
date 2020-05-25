@@ -13,5 +13,7 @@ namespace Assets.Scripts.Interface
         void OnStart();
 
         void OnDispose();
+
+        void Attack();
     }
 }

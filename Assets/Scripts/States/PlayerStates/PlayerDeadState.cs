@@ -1,5 +1,6 @@
 ﻿using Assets.Scripts.Characters;
 using Assets.Scripts.Interface;
+using Assets.Scripts.Models.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,16 +16,16 @@ namespace Assets.Scripts.States.PlayerStates
     /// </summary>
     public class PlayerDeadState : IState
     {
-        private Player _player;
+        private IPlayer _player;
 
-        public PlayerDeadState(Player player)
+        public PlayerDeadState(IPlayer player)
         {
             _player = player;
         }
 
         public void OnStart()
         {
-            _player.PlayerAnimator.SetFloat("Health", _player.HP);
+            _player.GetAnimator().SetInteger(AnimationParametersConst.HealthParameter, 0);
         }
 
         public void OnUpdate()
@@ -35,6 +36,11 @@ namespace Assets.Scripts.States.PlayerStates
         public void OnDispose()
         {
 
+        }
+
+        public void Attack()
+        {
+            //Ничего не делаем
         }
 
         /// <summary>
