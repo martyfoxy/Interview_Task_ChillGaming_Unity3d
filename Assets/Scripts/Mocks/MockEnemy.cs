@@ -1,28 +1,23 @@
 ﻿using Assets.Scripts.Interface;
 using Assets.Scripts.Models;
 using Assets.Scripts.Models.Enums;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts.Mocks
 {
     public class MockEnemy : IEnemy
     {
-        public float HP = 100f;
-        public float Armor = 0f;
-        public float Damage = 0f;
-        public float Vampirism = 0f;
+        private float hp = 100f;
+        private float armor = 25f;
+        private float damage = 25f;
+        private float vampirism = 0f;
 
-        public List<Stat> DefaultStats;
-        public List<Buff> EnemyBuffs;
+        private List<Buff> _buffs;
 
         public void Attack()
         {
-
+            
         }
 
         public void ChangeState(StatesEnum state)
@@ -32,8 +27,12 @@ namespace Assets.Scripts.Mocks
 
         public void BeginPlay(List<Stat> startStats, List<Buff> startBuffs)
         {
-            DefaultStats = new List<Stat>(startStats);
-            EnemyBuffs = new List<Buff>(startBuffs);
+            hp = startStats.Find(x => x.id == GameConst.HealthId).value;
+            armor = startStats.Find(x => x.id == GameConst.ArmorId).value;
+            damage = startStats.Find(x => x.id == GameConst.DamageId).value;
+            vampirism = startStats.Find(x => x.id == GameConst.VampirismId).value;
+
+            _buffs = new List<Buff>(startBuffs);
         }
 
         public void VampirismRestore(float damage)
@@ -44,7 +43,10 @@ namespace Assets.Scripts.Mocks
         public float TakeDamage(float damage)
         {
             //Урон, гасящийся броней
-            var resDamage = (100 - Armor) / 100 * damage;
+            var resDamage = (100 - armor) / 100 * damage;
+
+            hp -= resDamage;
+
             return resDamage;
         }
 
@@ -55,27 +57,27 @@ namespace Assets.Scripts.Mocks
 
         public float GetHP()
         {
-            return HP;
+            return hp;
         }
 
         public float GetDamage()
         {
-            return Damage;
+            return damage;
         }
 
         public float GetArmor()
         {
-            return Armor;
+            return armor;
         }
 
         public float GetVampirism()
         {
-            return Vampirism;
+            return vampirism;
         }
 
         public List<Buff> GetBuffs()
         {
-            return EnemyBuffs;
+            return _buffs;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.Characters;
-using Assets.Scripts.Interface;
+﻿using Assets.Scripts.Interface;
 using Assets.Scripts.Models;
 using Assets.Scripts.Models.Enums;
 using Assets.Scripts.ScriptableObjects;
@@ -20,6 +19,7 @@ namespace Assets.Scripts.Managers
         #region DI
         [Inject]
         private IUIManager _uiManager;
+
         private IPlayer _player;
         private IEnemy _enemy;
         private GameSettings _gameSettings;

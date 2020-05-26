@@ -40,7 +40,6 @@ namespace Assets.Scripts.Interface
         /// <returns>Список баффов</returns>
         List<Buff> GetBuffs();
 
-
         /// <summary>
         /// Атаковать
         /// </summary>

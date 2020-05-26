@@ -12,11 +12,11 @@
         public const string StartUpSettingsFile = "SettingsFiles/data";
         #endregion
 
-        #region Имена характеристик
-        public const string HPName = "жизнь";
-        public const string ArmorName = "броня";
-        public const string DamageName = "урон";
-        public const string VampirismName = "вампиризм";
+        #region ID характеристик
+        public const int HealthId = 0;
+        public const int ArmorId = 1;
+        public const int DamageId = 2;
+        public const int VampirismId = 3;
         #endregion
 
         #region Имена в иерархии префабов

@@ -22,18 +22,18 @@ namespace Assets.Scripts.Characters
         {
             get
             {
-                return _currentStats[0];
+                return _currentStats[GameConst.HealthId];
             }
             private set
             {
-                _currentStats[0] = value;
+                _currentStats[GameConst.HealthId] = value;
                 if (value < 1)
                 {
-                    _currentStats[0] = 0;
+                    _currentStats[GameConst.HealthId] = 0;
                     ChangeState(StatesEnum.Dead);
                 }
 
-                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = 0, Value = _currentStats[0], character = this });
+                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = GameConst.HealthId, Value = _currentStats[GameConst.HealthId], character = this });
             }
         }
 
@@ -44,12 +44,12 @@ namespace Assets.Scripts.Characters
         {
             get
             {
-                return _currentStats[1];
+                return _currentStats[GameConst.ArmorId];
             }
             private set
             {
-                _currentStats[1] = value;
-                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = 1, Value = _currentStats[1], character = this });
+                _currentStats[GameConst.ArmorId] = value;
+                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = GameConst.ArmorId, Value = _currentStats[GameConst.ArmorId], character = this });
             }
         }
         
@@ -61,12 +61,12 @@ namespace Assets.Scripts.Characters
         {
             get
             {
-                return _currentStats[2];
+                return _currentStats[GameConst.DamageId];
             }
             private set
             {
-                _currentStats[2] = value;
-                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = 2, Value = _currentStats[2], character = this });
+                _currentStats[GameConst.DamageId] = value;
+                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = GameConst.DamageId, Value = _currentStats[GameConst.DamageId], character = this });
             }
         }
 
@@ -77,14 +77,16 @@ namespace Assets.Scripts.Characters
         {
             get
             {
-                return _currentStats[3];
+                return _currentStats[GameConst.VampirismId];
             }
             private set
             {
-                _currentStats[3] = value;
-                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = 3, Value = _currentStats[3], character = this });
+                _currentStats[GameConst.VampirismId] = value;
+                _signalBus.Fire(new CharacterStatChangedSignal() { StatId = GameConst.VampirismId, Value = _currentStats[GameConst.VampirismId], character = this });
             }
         }
+
+        public IState CurrentState => _currentState;
         #endregion
 
         //Словарь текущих характеристик в формате [id - значение]
@@ -170,6 +172,9 @@ namespace Assets.Scripts.Characters
 
         public float TakeDamage(float damage)
         {
+            if (damage < 0)
+                damage = 0;
+
             //Урон, гасящийся броней
             var resDamage = (100 - Armor) / 100 * damage;
 
@@ -181,6 +186,9 @@ namespace Assets.Scripts.Characters
 
         public void VampirismRestore(float resDamage)
         {
+            if (resDamage < 0)
+                resDamage = 0;
+
             //В зависимости от нанесенного урона, вычисляем восстановленное hp, зависящее от вампиризма
             var restoredHp = Vampirism / 100 * resDamage;
 

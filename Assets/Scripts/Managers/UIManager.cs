@@ -35,11 +35,15 @@ namespace Assets.Scripts.Managers
         private PlayerPanelHierarchy _enemyPanel;
 
         [SerializeField]
+        private Text WinText;
+
+        [SerializeField]
         private GameObject StatPrefab;
 
         #region DI
         [Inject]
         private IGameManager _gameManager;
+
         private GameSettings _gameSettings;
         private IPlayer _player;
         private IEnemy _enemy;
@@ -106,6 +110,7 @@ namespace Assets.Scripts.Managers
         {
             _playerStatsTextRefs = new Dictionary<int, Text>();
             _enemyStatsTextRefs = new Dictionary<int, Text>();
+            WinText.gameObject.SetActive(false);
 
             foreach (Transform child in _playerPanel.statsPanel)
                 Destroy(child.gameObject);
@@ -139,12 +144,7 @@ namespace Assets.Scripts.Managers
                 AddBuffToPanel(_enemyPanel.statsPanel, buff);
             });
         }
-        #endregion
 
-        /// <summary>
-        /// Обработчик сигнала изменения показаний игроков
-        /// </summary>
-        /// <param name="signal">Сигнал</param>
         public void UpdateValue(CharacterStatChangedSignal signal)
         {
             if (signal.character.GetType() == _player.GetType())
@@ -152,6 +152,16 @@ namespace Assets.Scripts.Managers
             else
                 _enemyStatsTextRefs[signal.StatId].text = signal.Value.ToString(); ;
         }
+
+        public void EndOfGame(EndOfGameSignal signal)
+        {
+            WinText.gameObject.SetActive(true);
+            if (signal.looser.GetType() == _player.GetType())
+                WinText.text = "Enemy победил!";
+            else
+                WinText.text = "Player победил!";
+        }
+        #endregion
 
         /// <summary>
         /// Добавить иконку характеристики на панель

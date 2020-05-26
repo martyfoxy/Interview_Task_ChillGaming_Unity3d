@@ -1,18 +1,8 @@
-﻿using Assets.Scripts.Characters;
-using Assets.Scripts.Interface;
-using Assets.Scripts.Managers;
-using Assets.Scripts.ScriptableObjects;
+﻿using Assets.Scripts.Managers;
 using Assets.Scripts.Signals;
-using Assets.Scripts.States;
 using Assets.Scripts.States.EnemyStates;
 using Assets.Scripts.States.PlayerStates;
 using Assets.Scripts.States.StateFactories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 using Zenject;
 
 namespace Assets.Scripts.Installers
@@ -36,8 +26,11 @@ namespace Assets.Scripts.Installers
         {
             SignalBusInstaller.Install(Container);
 
+            //Биндим сигналы
             Container.DeclareSignal<CharacterStatChangedSignal>();
+            Container.DeclareSignal<EndOfGameSignal>();
             Container.BindSignal<CharacterStatChangedSignal>().ToMethod<UIManager>(x => x.UpdateValue).FromResolve();
+            Container.BindSignal<EndOfGameSignal>().ToMethod<UIManager>(x => x.EndOfGame).FromResolve();
 
             Container.BindInterfacesAndSelfTo<GameManager>().AsSingle();
         }

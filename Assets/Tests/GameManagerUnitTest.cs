@@ -67,10 +67,10 @@ public class GameManagerTest : ZenjectUnitTestFixture
 
         //Проверяем, что у игроков соответствующие настройкам характеристики
         var player = Container.Resolve<IPlayer>();
-        Assert.AreEqual(player.GetHP(), settings.Data.stats.First(x => x.title == GameConst.HPName).value);
+        Assert.AreEqual(player.GetHP(), settings.Data.stats.First(x => x.id == GameConst.HealthId).value);
 
         var enemy = Container.Resolve<IEnemy>();
-        Assert.AreEqual(enemy.GetArmor(), settings.Data.stats.First(x => x.title == GameConst.ArmorName).value);
+        Assert.AreEqual(enemy.GetArmor(), settings.Data.stats.First(x => x.id == GameConst.ArmorId).value);
 
         //Проверяем, что у игроков нет баффов
         Assert.AreEqual(0, player.GetBuffs().Count);
@@ -102,10 +102,10 @@ public class GameManagerTest : ZenjectUnitTestFixture
 
         //Проверяем, что у игроков соответствующие настройкам характеристики
         var player = Container.Resolve<IPlayer>();
-        Assert.AreEqual(player.GetHP(), settings.Data.stats.First(x => x.title == GameConst.HPName).value);
+        Assert.AreEqual(player.GetHP(), settings.Data.stats.First(x => x.id == GameConst.HealthId).value);
 
         var enemy = Container.Resolve<IEnemy>();
-        Assert.AreEqual(enemy.GetArmor(), settings.Data.stats.First(x => x.title == GameConst.ArmorName).value);
+        Assert.AreEqual(enemy.GetArmor(), settings.Data.stats.First(x => x.id == GameConst.ArmorId).value);
 
         //Проверяем, что у игроков есть баффы
         Assert.Greater(player.GetBuffs().Count, 0);

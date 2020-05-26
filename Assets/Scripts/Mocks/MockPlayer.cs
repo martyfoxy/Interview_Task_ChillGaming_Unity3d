@@ -1,11 +1,7 @@
 ﻿using Assets.Scripts.Interface;
 using Assets.Scripts.Models;
 using Assets.Scripts.Models.Enums;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts.Mocks
@@ -13,32 +9,30 @@ namespace Assets.Scripts.Mocks
     public class MockPlayer : IPlayer
     {
         private float hp = 100f;
-        private float armor = 0f;
-        private float damage = 0f;
+        private float armor = 25f;
+        private float damage = 25f;
         private float vampirism = 0f;
 
-        private List<Buff> playerBuffs;
+        private List<Buff> _buffs;
 
         public void Attack()
         {
-            
+
         }
 
         public void ChangeState(StatesEnum state)
         {
-            
+
         }
 
         public void BeginPlay(List<Stat> startStats, List<Buff> startBuffs)
         {
-            playerBuffs = new List<Buff>(startBuffs);
+            hp = startStats.Find(x => x.id == GameConst.HealthId).value;
+            armor = startStats.Find(x => x.id == GameConst.ArmorId).value;
+            damage = startStats.Find(x => x.id == GameConst.DamageId).value;
+            vampirism = startStats.Find(x => x.id == GameConst.VampirismId).value;
 
-            hp = startStats.Find(x => x.title == GameConst.HPName).value;
-            armor = startStats.Find(x => x.title == GameConst.ArmorName).value;
-            damage = startStats.Find(x => x.title == GameConst.DamageName).value;
-            vampirism = startStats.Find(x => x.title == GameConst.VampirismName).value;
-
-            playerBuffs = new List<Buff>(startBuffs);
+            _buffs = new List<Buff>(startBuffs);
         }
 
         public void VampirismRestore(float damage)
@@ -50,6 +44,9 @@ namespace Assets.Scripts.Mocks
         {
             //Урон, гасящийся броней
             var resDamage = (100 - armor) / 100 * damage;
+
+            hp -= resDamage;
+
             return resDamage;
         }
 
@@ -80,7 +77,7 @@ namespace Assets.Scripts.Mocks
 
         public List<Buff> GetBuffs()
         {
-            return playerBuffs;
+            return _buffs;
         }
     }
 }

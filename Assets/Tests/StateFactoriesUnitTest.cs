@@ -7,6 +7,7 @@ using Assets.Scripts.Models.Enums;
 using Assets.Scripts.Mocks;
 using Assets.Scripts.States.PlayerStates;
 using Assets.Scripts.States.EnemyStates;
+using Assets.Scripts.Signals;
 
 [TestFixture]
 public class StateFactoriesUnitTest : ZenjectUnitTestFixture

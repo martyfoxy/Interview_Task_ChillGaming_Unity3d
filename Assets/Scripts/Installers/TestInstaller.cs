@@ -2,6 +2,7 @@
 using Assets.Scripts.Interface;
 using Assets.Scripts.Managers;
 using Assets.Scripts.Mocks;
+using Assets.Scripts.Signals;
 using Assets.Scripts.States.EnemyStates;
 using Assets.Scripts.States.PlayerStates;
 using Assets.Scripts.States.StateFactories;
@@ -17,6 +18,12 @@ namespace Assets.Scripts.Installers
     {
         public override void InstallBindings()
         {
+            SignalBusInstaller.Install(Container);
+            Container.DeclareSignal<CharacterStatChangedSignal>();
+            Container.DeclareSignal<EndOfGameSignal>();
+            Container.BindSignal<CharacterStatChangedSignal>().ToMethod<IUIManager>(x => x.UpdateValue).FromResolve();
+            Container.BindSignal<EndOfGameSignal>().ToMethod<IUIManager>(x => x.EndOfGame).FromResolve();
+
             //Биндим фабрику состояний игрока
             Container.Bind<PlayerStateFactory>().AsSingle();
 

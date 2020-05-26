@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Assets.Scripts.Signals;
+
 namespace Assets.Scripts.Interface
 {
     /// <summary>
@@ -22,5 +21,17 @@ namespace Assets.Scripts.Interface
         /// Отобразить иконки баффов игроков
         /// </summary>
         void ShowBuffsIcons();
+
+        /// <summary>
+        /// Обработчик сигнала изменения показаний игроков
+        /// </summary>
+        /// <param name="signal">Сигнал</param>
+        void UpdateValue(CharacterStatChangedSignal signal);
+
+        /// <summary>
+        /// Обработчик сигнала окончания игры
+        /// </summary>
+        /// <param name="signal">Сигнал</param>
+        void EndOfGame(EndOfGameSignal signal);
     }
 }

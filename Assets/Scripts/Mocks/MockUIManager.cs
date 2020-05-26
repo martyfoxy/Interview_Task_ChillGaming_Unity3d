@@ -1,14 +1,15 @@
 ﻿using Assets.Scripts.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Assets.Scripts.Signals;
 
 namespace Assets.Scripts.Mocks
 {
     public class MockUIManager : IUIManager
     {
+        public void EndOfGame(EndOfGameSignal signal)
+        {
+            
+        }
+
         public void Reset()
         {
             
@@ -20,6 +21,11 @@ namespace Assets.Scripts.Mocks
         }
 
         public void ShowStatsIcons()
+        {
+            
+        }
+
+        public void UpdateValue(CharacterStatChangedSignal signal)
         {
             
         }
